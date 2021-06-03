@@ -1,5 +1,5 @@
 {
-  "name": "electron-typescript-context-bridge",
+  "name": "electron-typescript-ipc",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JichouP/electron-typescript-context-bridge.git"
+    "url": "git+https://github.com/JichouP/electron-typescript-ipc.git"
   },
   "keywords": [
     "electron",
@@ -28,9 +28,9 @@
   "author": "JichouP",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/JichouP/electron-typescript-context-bridge/issues"
+    "url": "https://github.com/JichouP/electron-typescript-ipc/issues"
   },
-  "homepage": "https://github.com/JichouP/electron-typescript-context-bridge#readme",
+  "homepage": "https://github.com/JichouP/electron-typescript-ipc#readme",
   "peerDependencies": {
     "electron": ">12.0.0"
   },

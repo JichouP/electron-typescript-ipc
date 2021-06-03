@@ -43,9 +43,15 @@ export type Api = GetApiType<
     showAlert: (text: string, num: number) => Promise<void>;
   }
 >;
+
+declare global {
+  interface Window {
+    myAPI: Api;
+  }
+}
 ```
 
-### `preload.ts`
+### `preload/preload.ts`
 
 ```typescript
 import { contextBridge, ipcRenderer } from 'electron-typescript-ipc';
@@ -65,10 +71,29 @@ const api: Api = {
 };
 
 contextBridge.exposeInMainWorld('myAPI', api);
+```
 
-declare global {
-  interface Window {
-    myAPI: Api;
-  }
+### `lib/main.ts`
+
+```typescript
+const createWindow = (): void => {
+  const mainWindow = ...
+
+  mainWindow.on('ready-to-show', () => {
+    ipcMain.removeHandler<Api>('getDataFromStore'); // This is essential in case you are called multiple times.
+    ipcMain.handle<Api>('getDataFromStore', async (_event, key) => {
+      return await store.get(key);
+    });
+    setInterval(ipcMain.send<Api>(mainWindow, 'showAlert', 'Hi'), 10000)
+  })
 }
+```
+
+### `renderer/app.ts`
+
+```typescript
+window.myApi.invoke.getDataFromStore('someKey').then(console.log);
+window.myApi.on.showAlert((_event, text) => {
+  alert(text);
+});
 ```
