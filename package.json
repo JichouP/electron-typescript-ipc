@@ -9,8 +9,7 @@
     "lint": "eslint src/**/*.ts",
     "prepublishOnly": "npm run build",
     "pack:local": "npm pack",
-    "link:local": "npm link",
-    "preinstall": "npx only-allow pnpm"
+    "link:local": "npm link"
   },
   "repository": {
     "type": "git",
