@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   contextBridge as originalContextBridge,
   ipcMain as originalIpcMain,
