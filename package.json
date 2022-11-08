@@ -36,6 +36,6 @@
     "electron": "^13.0.0",
     "eslint": "^8.27.0",
     "prettier": "^2.7.1",
-    "typescript": "^4.3.2"
+    "typescript": "^4.8.4"
   }
 }
