@@ -17,7 +17,7 @@ npm i electron-typescript-ipc
 
 ## Example
 
-We have a template repository for using this module
+We have a template repository for using this module  
 Please see here: **<https://github.com/JichouP/electron-typescript-ipc-example>**
 
 ### `preload/preload.ts`
