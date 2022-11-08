@@ -1,15 +1,15 @@
 # electron-typescript-ipc
 
-Library for type-safe use of contextBridge in Electron
+Library for type-safe use of contextBridge in Electron.
 
 ## Motivation
 
-When we implement ipc using contextBridge in TypeScript, we can't know if the method exists (unsafe)
-This library is aimed at making it type-safe to use
+When we implement ipc using contextBridge in TypeScript, we can't know if the method exists (unsafe).
+This library is aimed at making it type-safe to use.
 
 ## Install
 
-Install with npm (or you can use your favorite tool)
+Install with npm (or you can use your favorite tool).
 
 ```shell
 npm i electron-typescript-ipc
@@ -17,8 +17,8 @@ npm i electron-typescript-ipc
 
 ## Example
 
-We have a template repository for using this module  
-Please see here: **<https://github.com/JichouP/electron-typescript-ipc-example>**
+We have a template repository for using this module.  
+Please see here: **<https://github.com/JichouP/electron-typescript-ipc-example>**.
 
 ### `preload/preload.ts`
 
