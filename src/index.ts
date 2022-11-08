@@ -70,12 +70,20 @@ export const contextBridge = {
 };
 
 export const ipcRenderer = {
+  /**
+   * @example
+   * window.myAPI.invoke.getDataFromStore('Test').then(console.log);
+   */
   invoke: <T extends Api>(
     channel: keyof T['invoke'],
     ...args: Parameters<T['invoke'][keyof T['invoke']]>
   ): Promise<ReturnType<T['invoke'][keyof T['invoke']]>> => {
     return originalIpcRenderer.invoke(channel as string, ...args);
   },
+  /**
+   * @example
+   * window.myAPI.on.showAlert(console.log);
+   */
   on<T extends Api>(
     channel: keyof T['on'],
     listener: (
@@ -102,6 +110,12 @@ export const ipcRenderer = {
 };
 
 export const ipcMain = {
+  /**
+   * @example
+   * ipcMain.handle<Api>('getDataFromStore', async (_, str) => {
+   *   return str;
+   * });
+   */
   handle<T extends Api>(
     channel: keyof T['invoke'],
     listener: (
@@ -120,6 +134,10 @@ export const ipcMain = {
     );
   },
 
+  /**
+   * @example
+   * ipcMain.send<Api>(mainWindow, 'showAlert', 'Hello World');
+   */
   send<T extends Api>(
     window: BrowserWindow,
     channel: keyof T['on'],
