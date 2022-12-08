@@ -1,11 +1,11 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
-import { contextBridge, ipcRenderer, GetApiType } from '../src/index';
+import { contextBridge, GetApiType, createIpcRenderer } from '../src/index';
 
 export type Api = GetApiType<
   {
     a: (str: string) => Promise<string>;
-    b: (str: string) => Promise<number>;
+    b: (str: number) => Promise<number>;
   },
   {
     c: (text: string) => Promise<void>;
@@ -13,21 +13,23 @@ export type Api = GetApiType<
   }
 >;
 
+const ipcRenderer = createIpcRenderer<Api>();
+
 const api: Api = {
   invoke: {
     a: async (key: string) => {
-      return await ipcRenderer.invoke<Api, 'a'>('a', key);
+      return await ipcRenderer.invoke('a', key);
     },
-    b: async (key: string) => {
-      return await ipcRenderer.invoke<Api, 'b'>('b', key);
+    b: async (key: number) => {
+      return await ipcRenderer.invoke('b', key);
     },
   },
   on: {
     c: listener => {
-      ipcRenderer.on<Api, 'c'>('c', listener);
+      ipcRenderer.on('c', listener);
     },
     d: listener => {
-      ipcRenderer.on<Api, 'd'>('d', listener);
+      ipcRenderer.on('d', listener);
     },
   },
 };

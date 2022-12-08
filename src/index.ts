@@ -8,6 +8,69 @@ import {
   BrowserWindow,
 } from 'electron';
 
+type IpcRenderer<T extends Api> = {
+  invoke<K extends keyof T['invoke']>(
+    channel: K,
+    ...args: Parameters<T['invoke'][K]>
+  ): Promise<ReturnType<T['invoke'][K]>>;
+  on<T extends Api, K extends keyof T['on']>(
+    channel: K,
+    listener: (...args: Parameters<Parameters<T['on'][K]>['0']>) => void,
+  ): void;
+  addEventListener<T extends Api, K extends keyof T['on']>(
+    channel: K,
+    listener: (...args: Parameters<Parameters<T['on'][K]>['0']>) => void,
+  ): void;
+  removeListener<T extends Api>(
+    channel: keyof T['on'],
+    listener: (...args: unknown[]) => void,
+  ): void;
+  off<T extends Api>(
+    channel: keyof T['on'],
+    listener: (...args: unknown[]) => void,
+  ): void;
+};
+
+export const createIpcRenderer = <T extends Api>() =>
+  originalIpcRenderer as unknown as IpcRenderer<T> & typeof originalIpcRenderer;
+
+type IpcMain<T extends Api> = {
+  handle<K extends keyof T['invoke']>(
+    channel: K,
+    listener: (
+      event: IpcMainInvokeEvent,
+      ...args: Parameters<T['invoke'][K]>
+    ) => ReturnType<T['invoke'][K]>,
+  ): void;
+  handleOnce<K extends keyof T['invoke']>(
+    channel: K,
+    listener: (
+      event: IpcMainInvokeEvent,
+      ...args: Parameters<T['invoke'][K]>
+    ) => ReturnType<T['invoke'][K]>,
+  ): void;
+  send<K extends keyof T['on']>(
+    window: BrowserWindow,
+    channel: K,
+    ...args: Tail<Parameters<Parameters<T['on'][K]>['0']>>
+  ): void;
+  removeHandler<T extends Api>(channel: keyof T['invoke']): void;
+};
+
+export const createIpcMain = <T extends Api>() =>
+  ({
+    ...originalIpcMain,
+    send<T extends Api, K extends keyof T['on']>(
+      window: BrowserWindow,
+      channel: K,
+      ...args: Tail<Parameters<Parameters<T['on'][K]>['0']>>
+    ): void {
+      window.webContents.send(channel as string, ...args);
+    },
+  } as unknown as IpcMain<T> & typeof originalIpcMain);
+
+type Tail<T extends unknown[]> = T extends [any, ...infer Rest] ? Rest : [];
+
 type UnknownFunction = (...args: any) => unknown;
 
 type IpcRendererListener<Args extends UnknownFunction> = (
@@ -62,78 +125,5 @@ export const contextBridge = {
     api: T,
   ) => {
     originalContextBridge.exposeInMainWorld(apiKey, api);
-  },
-};
-
-export const ipcRenderer = {
-  /**
-   * @example
-   * window.myAPI.invoke.getDataFromStore('Test').then(console.log);
-   */
-  invoke: <T extends Api, K extends keyof T['invoke']>(
-    channel: K,
-    ...args: Parameters<T['invoke'][K]>
-  ): Promise<ReturnType<T['invoke'][K]>> => {
-    return originalIpcRenderer.invoke(channel as string, ...args);
-  },
-  /**
-   * @example
-   * window.myAPI.on.showAlert(console.log);
-   */
-  on<T extends Api, K extends keyof T['on']>(
-    channel: K,
-    listener: (...args: Parameters<Parameters<T['on'][K]>['0']>) => void,
-  ): void {
-    originalIpcRenderer.on(channel as string, (...args: unknown[]) => {
-      listener(...(args as Parameters<Parameters<T['on'][K]>['0']>));
-    });
-  },
-  removeListener<T extends Api>(
-    channel: keyof T['on'],
-    listener: (...args: unknown[]) => void,
-  ): void {
-    originalIpcRenderer.removeListener(channel as string, listener);
-  },
-};
-
-export const ipcMain = {
-  /**
-   * @example
-   * ipcMain.handle<Api>('getDataFromStore', async (_, str) => {
-   *   return str;
-   * });
-   */
-  handle<T extends Api>(
-    channel: keyof T['invoke'],
-    listener: (
-      event: IpcMainInvokeEvent,
-      ...args: Parameters<T['invoke'][keyof T['invoke']]>
-    ) => ReturnType<T['invoke'][keyof T['invoke']]>,
-  ): void {
-    originalIpcMain.handle(
-      channel as string,
-      (event: IpcMainInvokeEvent, ...args: unknown[]) => {
-        return listener(
-          event,
-          ...(args as Parameters<T['invoke'][keyof T['invoke']]>),
-        );
-      },
-    );
-  },
-
-  /**
-   * @example
-   * ipcMain.send<Api>(mainWindow, 'showAlert', 'Hello World');
-   */
-  send<T extends Api>(
-    window: BrowserWindow,
-    channel: keyof T['on'],
-    ...args: Parameters<Parameters<T['on'][keyof T['on']]>['0']>
-  ): void {
-    window.webContents.send(channel as string, ...args);
-  },
-
-  removeHandler<T extends Api>(channel: keyof T['invoke']): void {
-    originalIpcMain.removeHandler(channel as string);
   },
 };
