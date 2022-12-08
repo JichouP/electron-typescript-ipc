@@ -1,6 +1,6 @@
 {
   "name": "electron-typescript-ipc",
-  "version": "2.1.2",
+  "version": "3.0.0",
   "description": "Library for type-safe use of contextBridge in Electron",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
