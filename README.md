@@ -25,10 +25,12 @@ Please see here: **<https://github.com/JichouP/electron-typescript-ipc-example>*
 ```typescript
 import {
   contextBridge,
-  ipcRenderer,
+  createIpcRenderer,
   GetApiType,
 } from 'electron-typescript-ipc';
 import { Api } from 'path/to/api.ts';
+
+const ipcRenderer = createIpcRenderer<Api>();
 
 export type Api = GetApiType<
   {
@@ -42,15 +44,12 @@ export type Api = GetApiType<
 const api: Api = {
   invoke: {
     getDataFromStore: async (key: string) => {
-      return await ipcRenderer.invoke<Api, 'getDataFromStore'>(
-        'getDataFromStore',
-        key,
-      );
+      return await ipcRenderer.invoke('getDataFromStore', key);
     },
   },
   on: {
     showAlert: listener => {
-      ipcRenderer.on<Api, 'showAlert'>('showAlert', listener);
+      ipcRenderer.on('showAlert', listener);
     },
   },
 };

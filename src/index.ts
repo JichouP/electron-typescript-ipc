@@ -87,7 +87,9 @@ type Api = GetApiType<Record<string, any>, Record<string, any>>;
 
 /**
  * @example
- * import { contextBridge, ipcRenderer, GetApiType } from 'electron-typescript-ipc';
+ * import { contextBridge, createIpcRenderer, GetApiType } from 'electron-typescript-ipc';
+ *
+ * const ipcRenderer = createIpcRenderer<Api>();
  *
  * export type Api = GetApiType<
  *   {
@@ -101,12 +103,12 @@ type Api = GetApiType<Record<string, any>, Record<string, any>>;
  * const api: Api = {
  *   invoke: {
  *     getDataFromStore: async (key: string) => {
- *       return await ipcRenderer.invoke<Api, 'getDataFromStore'>('getDataFromStore', key);
+ *       return await ipcRenderer.invoke('getDataFromStore', key);
  *     },
  *   },
  *   on: {
  *     showAlert: (listener) => {
- *       ipcRenderer.on<Api, 'showAlert'>('showAlert', listener);
+ *       ipcRenderer.on('showAlert', listener);
  *     },
  *   },
  * };
