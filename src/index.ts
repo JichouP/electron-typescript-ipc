@@ -8,20 +8,16 @@ import {
   BrowserWindow,
 } from 'electron';
 
-export type GetApiType<
-  FromRenderer extends Record<string, (...args: any[]) => Promise<any>>,
-  FromMain extends Record<string, (...args: any[]) => Promise<any>>,
-> = {
-  invoke: FromRenderer;
-  on: {
-    [K in keyof FromMain]: (
-      listener: (
-        event: IpcRendererEvent,
-        ...args: Parameters<FromMain[K]>
-      ) => void,
-      __originalFunction?: FromMain[K],
-    ) => void;
-  };
+type UnknownFunction = (...args: any) => unknown;
+
+type IpcRendererListener<Args extends UnknownFunction> = (
+  event: IpcRendererEvent,
+  ...args: Parameters<Args>
+) => void;
+
+export type GetApiType<T, S extends Record<string, UnknownFunction>> = {
+  invoke: T;
+  on: { [K in keyof S]: (listener: IpcRendererListener<S[K]>) => void };
 };
 
 type Api = GetApiType<Record<string, any>, Record<string, any>>;
@@ -74,32 +70,23 @@ export const ipcRenderer = {
    * @example
    * window.myAPI.invoke.getDataFromStore('Test').then(console.log);
    */
-  invoke: <T extends Api>(
-    channel: keyof T['invoke'],
-    ...args: Parameters<T['invoke'][keyof T['invoke']]>
-  ): Promise<ReturnType<T['invoke'][keyof T['invoke']]>> => {
+  invoke: <T extends Api, K extends keyof T['invoke']>(
+    channel: K,
+    ...args: Parameters<T['invoke'][K]>
+  ): Promise<ReturnType<T['invoke'][K]>> => {
     return originalIpcRenderer.invoke(channel as string, ...args);
   },
   /**
    * @example
    * window.myAPI.on.showAlert(console.log);
    */
-  on<T extends Api>(
-    channel: keyof T['on'],
-    listener: (
-      event: IpcRendererEvent,
-      ...args: Parameters<Parameters<T['on'][keyof T['on']]>['1']>
-    ) => void,
+  on<T extends Api, K extends keyof T['on']>(
+    channel: K,
+    listener: (...args: Parameters<Parameters<T['on'][K]>['0']>) => void,
   ): void {
-    originalIpcRenderer.on(
-      channel as string,
-      (event: IpcRendererEvent, ...args: unknown[]) => {
-        listener(
-          event,
-          ...(args as Parameters<Parameters<T['on'][keyof T['on']]>['1']>),
-        );
-      },
-    );
+    originalIpcRenderer.on(channel as string, (...args: unknown[]) => {
+      listener(...(args as Parameters<Parameters<T['on'][K]>['0']>));
+    });
   },
   removeListener<T extends Api>(
     channel: keyof T['on'],
@@ -141,7 +128,7 @@ export const ipcMain = {
   send<T extends Api>(
     window: BrowserWindow,
     channel: keyof T['on'],
-    ...args: Parameters<Parameters<T['on'][keyof T['on']]>['1']>
+    ...args: Parameters<Parameters<T['on'][keyof T['on']]>['0']>
   ): void {
     window.webContents.send(channel as string, ...args);
   },
