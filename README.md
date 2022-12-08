@@ -42,12 +42,15 @@ export type Api = GetApiType<
 const api: Api = {
   invoke: {
     getDataFromStore: async (key: string) => {
-      return await ipcRenderer.invoke<Api>('getDataFromStore', key);
+      return await ipcRenderer.invoke<Api, 'getDataFromStore'>(
+        'getDataFromStore',
+        key,
+      );
     },
   },
   on: {
     showAlert: listener => {
-      ipcRenderer.on<Api>('showAlert', listener);
+      ipcRenderer.on<Api, 'showAlert'>('showAlert', listener);
     },
   },
 };
