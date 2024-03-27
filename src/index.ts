@@ -80,7 +80,15 @@ type IpcRendererListener<Args extends UnknownFunction> = (
 
 export type GetApiType<T, S extends Record<string, UnknownFunction>> = {
   invoke: T;
-  on: { [K in keyof S]: (listener: IpcRendererListener<S[K]>) => void };
+  on: {
+    [K in keyof S]:
+      /**
+       * Subscribe message channel from the main process
+       * @param listener The callback to handle messages from main process 
+       * @return An optional callback to unsubscribe
+       */
+      (listener: IpcRendererListener<S[K]>) => (void | (() => void))
+  };
 };
 
 type Api = GetApiType<Record<string, any>, Record<string, any>>;
